@@ -28,8 +28,6 @@ Los usuarios que dispongan de un vehículo, podrán publicarlo en la plataforma 
 Este trabajo será desarrollado sobre una plataforma web. Se centrará principalmente para su uso en dispositivos de escritorio y móviles. El desarrollo será realizado de manera autónoma, basándome principalmente en los conocimientos obtenidos durante el Máster de Ingeniería Web. Los lenguajes utilizados para el desarrollo del proyecto se definirán según las necesidades de front-end y back-end según el caso.  Se contará con una base de datos relacional para almacenar toda la información necesaria para el correcto funcionamiento de la aplicación.
 
 ---
-**Referencias de interés:** 
+**Wiki del proyecto:** 
 
-https://es.wikipedia.org/wiki/Tecnología
-
-https://es.wikipedia.org/wiki/Acuerdo_de_París
+https://github.com/MiguelArber/driversity/wiki
