@@ -33,17 +33,18 @@ class Location
      */
     private $locationName;
 
+
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User", mappedBy="campus")
+     * @ORM\Column(type="boolean")
      */
-    private $users;
+    private $isCampus;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
     }
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -84,31 +85,19 @@ class Location
         return $this;
     }
 
-    /**
-     * @return Collection|User[]
-     */
-    public function getUsers(): Collection
+    public function getIsCampus(): ?bool
     {
-        return $this->users;
+        return $this->isCampus;
     }
 
-    public function addUser(User $user): self
+    public function setIsCampus(bool $isCampus): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-            $user->addCampus($this);
-        }
+        $this->isCampus = $isCampus;
 
         return $this;
     }
 
-    public function removeUser(User $user): self
-    {
-        if ($this->users->contains($user)) {
-            $this->users->removeElement($user);
-            $user->removeCampus($this);
-        }
-
-        return $this;
+    public function __toString() {
+        return $this->locationName;
     }
 }

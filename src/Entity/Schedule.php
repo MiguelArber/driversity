@@ -32,7 +32,7 @@ class Schedule
      */
     private $user;
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
