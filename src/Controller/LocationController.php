@@ -6,9 +6,11 @@ use App\Entity\Location;
 use App\Form\LocationType;
 use App\Repository\LocationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Flex\Unpack\Result;
 
 /**
  * @Route("/location")
@@ -20,7 +22,16 @@ class LocationController extends Controller
      */
     public function index(LocationRepository $locationRepository): Response
     {
-        return $this->render('location/index.html.twig', ['locations' => $locationRepository->findAll()]);
+        //return $this->render('location/index.html.twig', ['locations' => $locationRepository->findAll()]);
+        return new JsonResponse($locationRepository->findAll());
+    }
+
+    /**
+     * @Route("/campus", name="location_campus", methods="GET")
+     */
+    public function getAllCampus(LocationRepository $locationRepository): JsonResponse
+    {
+        return new JsonResponse($locationRepository->findByCampus(true));
     }
 
     /**
