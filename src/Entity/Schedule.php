@@ -3,19 +3,20 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ScheduleRepository")
  */
-class Schedule
+class Schedule implements JsonSerializable
 {
+
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
-
     /**
      * @ORM\Column(type="string", length=255)
      */
@@ -71,5 +72,20 @@ class Schedule
         $this->user = $user;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return array(
+            'id' => $this->id,
+            'day' => $this->day,
+            'time' => $this->time,
+            'user' => $this->user
+        );
+    }
+
+    public function __toString()
+    {
+        return (string) $this->day.' at '.$this->time();
     }
 }

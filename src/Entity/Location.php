@@ -5,15 +5,16 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\LocationRepository")
  */
-class Location
+class Location implements JsonSerializable
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -33,11 +34,16 @@ class Location
      */
     private $locationName;
 
-
     /**
      * @ORM\Column(type="boolean")
      */
     private $isCampus;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="campus")
+     */
+    private $users;
+
 
     public function __construct()
     {
@@ -97,7 +103,49 @@ class Location
         return $this;
     }
 
+    public function jsonSerialize()
+    {
+        return array(
+            'id' => $this->id,
+            'lat' => $this->lat,
+            'lon' => $this->lon,
+            'locationName' => $this->locationName,
+            'isCampus' => $this->isCampus
+        );
+    }
+
     public function __toString() {
-        return $this->locationName;
+        return (string) $this->locationName;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setOrigin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->contains($user)) {
+            $this->users->removeElement($user);
+            // set the owning side to null (unless already changed)
+            if ($user->getOrigin() === $this) {
+                $user->setOrigin(null);
+            }
+        }
+
+        return $this;
     }
 }
