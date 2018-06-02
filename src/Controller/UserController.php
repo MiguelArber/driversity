@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Location;
+use App\Entity\Schedule;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
@@ -42,9 +43,12 @@ class UserController extends Controller
                 {
                     if($user->getCampus() == $otherUser->getCampus()) //Checking that both users go to the same campus
                     {
-                        if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex()) //Checking that the distanceFlex is OK
+                        if($this->isScheduleCompatible($user, $otherUser)) //Checking that the schedules are compatible
                         {
-                            array_push($compatibleUsers, $otherUser);
+                            if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex()) //Checking that the distanceFlex is OK
+                            {
+                                array_push($compatibleUsers, $otherUser);
+                            }
                         }
                     }
                 }
@@ -54,26 +58,62 @@ class UserController extends Controller
         return new JsonResponse($compatibleUsers);
     }
 
-
-    private function getDistance(Location $p1, Location $p2): float
+    private function isScheduleCompatible(User $user1, User $user2)
     {
-        $R = 6378137; // Earths radius in meter (mean)
 
-        $dLat = $this->getRad($p2->getLat() - $p1->getLat());
-        $dLong = $this->getRad($p2->getLon() - $p1->getLon());
+        $compatible = false;
+
+        foreach ($user1->getSchedule() as $user1Schedule)
+        {
+            foreach ($user2->getSchedule() as $user2Schedule)
+            {
+                if ($user1Schedule->getDay() == $user2Schedule->getDay()) //Checking if the days are the same
+                {
+                    if($user1->getTimeFlex() > $user2->getTimeFlex()) //Checking if the timeFlex is compatible
+                    {
+                        if($user1Schedule->getTime() - $user2Schedule->getTime() <= $user2->getTimeFlex())
+                        {
+                            $compatible = true;
+                            break 2;
+                        }
+                    } else
+                    {
+                        if($user2Schedule->getTime() - $user1Schedule->getTime() <= $user1->getTimeFlex())
+                        {
+                            $compatible = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $compatible;
+    }
+
+    private function getDistance(Location $location1, Location $location2): float
+    {
+        $R = 6378137; // Earths radius in meters (mean)
+
+        $dLat = $this->getRad($location2->getLat() - $location1->getLat());
+        $dLong = $this->getRad($location2->getLon() - $location1->getLon());
+
+        //Harvesine formula to calculate distance between two coordinates
 
         $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos($this->getRad($p1->getLat())) * cos($this->getRad($p2->getLat())) *
+            cos($this->getRad($location1->getLat())) * cos($this->getRad($location2->getLat())) *
             sin($dLong / 2) * sin($dLong / 2);
         $c = 2 * asin(sqrt($a));
         $d = $R * $c;
-        dump('distance: '.$d);
+
+        //dump('distance: '.$d);
+
         return $d; // Distance returned in meters
     }
 
-    private function getRad(float $x): float
+    private function getRad(float $point): float
     {
-        return $x * M_PI / 180;
+        return $point * M_PI / 180;
     }
 
     /**
