@@ -28,6 +28,10 @@ Los usuarios que dispongan de un vehículo, podrán publicarlo en la plataforma 
 Este trabajo será desarrollado sobre una plataforma web. Se centrará principalmente para su uso en dispositivos de escritorio y móviles. El desarrollo será realizado de manera autónoma, basándome principalmente en los conocimientos obtenidos durante el Máster de Ingeniería Web. Los lenguajes utilizados para el desarrollo del proyecto se definirán según las necesidades de front-end y back-end según el caso.  Se contará con una base de datos relacional para almacenar toda la información necesaria para el correcto funcionamiento de la aplicación.
 
 ---
-**Wiki del proyecto:** 
+**Wiki del proyecto:**
 
 https://github.com/MiguelArber/driversity/wiki
+
+**Generación de datos en la BD en fase de pruebas**
+
+`php bin/console doctrine:fixtures:load --append`
