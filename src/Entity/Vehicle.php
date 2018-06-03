@@ -3,15 +3,16 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\VehicleRepository")
  */
-class Vehicle
+class Vehicle implements JsonSerializable
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -36,8 +37,7 @@ class Vehicle
      */
     private $price;
 
-
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -88,5 +88,21 @@ class Vehicle
         $this->price = $price;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return array(
+            'id' => $this->id,
+            'type' => $this->type,
+            'seats' => $this->seats,
+            'model' => $this->model,
+            'price' => $this->price
+        );
+    }
+
+    public function __toString()
+    {
+        return (string) $this->model;
     }
 }

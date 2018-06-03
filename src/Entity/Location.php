@@ -5,15 +5,16 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\LocationRepository")
  */
-class Location
+class Location implements JsonSerializable
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -34,16 +35,22 @@ class Location
     private $locationName;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User", mappedBy="campus")
+     * @ORM\Column(type="boolean")
+     */
+    private $isCampus;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="campus")
      */
     private $users;
+
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
     }
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -84,6 +91,33 @@ class Location
         return $this;
     }
 
+    public function getIsCampus(): ?bool
+    {
+        return $this->isCampus;
+    }
+
+    public function setIsCampus(bool $isCampus): self
+    {
+        $this->isCampus = $isCampus;
+
+        return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return array(
+            'id' => $this->id,
+            'lat' => $this->lat,
+            'lon' => $this->lon,
+            'locationName' => $this->locationName,
+            'isCampus' => $this->isCampus
+        );
+    }
+
+    public function __toString() {
+        return (string) $this->locationName;
+    }
+
     /**
      * @return Collection|User[]
      */
@@ -96,7 +130,7 @@ class Location
     {
         if (!$this->users->contains($user)) {
             $this->users[] = $user;
-            $user->addCampus($this);
+            $user->setOrigin($this);
         }
 
         return $this;
@@ -106,7 +140,10 @@ class Location
     {
         if ($this->users->contains($user)) {
             $this->users->removeElement($user);
-            $user->removeCampus($this);
+            // set the owning side to null (unless already changed)
+            if ($user->getOrigin() === $this) {
+                $user->setOrigin(null);
+            }
         }
 
         return $this;

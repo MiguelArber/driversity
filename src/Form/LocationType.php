@@ -15,7 +15,7 @@ class LocationType extends AbstractType
             ->add('lat')
             ->add('lon')
             ->add('locationName')
-            ->add('users')
+            ->add('isCampus')
         ;
     }
 

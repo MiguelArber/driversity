@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Location;
+use App\Entity\Schedule;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,9 +21,99 @@ class UserController extends Controller
     /**
      * @Route("/", name="user_index", methods="GET")
      */
-    public function index(UserRepository $userRepository): Response
+    public function index(UserRepository $userRepository): JsonResponse
     {
-        return $this->render('user/index.html.twig', ['users' => $userRepository->findAll()]);
+        //return $this->render('user/index.html.twig', ['users' => $userRepository->findAll()]);
+        return new JsonResponse($userRepository->findAll());
+    }
+
+
+    /**
+     * @Route("/{id}/compatible", name="match_compatible", methods="GET")
+     */
+    public function compatibleUsers(User $user, UserRepository $userRepository): JsonResponse
+    {
+
+        $allUsers = $userRepository->findAll();
+        $compatibleUsers = array();
+        foreach($allUsers as $otherUser) {
+            if($user->getId() != $otherUser->getId()) //Checking that user is not the same
+            {
+                if(($user->getVehicle() == null && $otherUser->getVehicle() != null) || ($user->getVehicle() != null && $otherUser->getVehicle() == null)) //Checking that at least one user has a car
+                {
+                    if($user->getCampus() == $otherUser->getCampus()) //Checking that both users go to the same campus
+                    {
+                        if($this->isScheduleCompatible($user, $otherUser)) //Checking that the schedules are compatible
+                        {
+                            if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex() && $this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $otherUser->getLocationFlex()) //Checking that the distanceFlex is OK
+                            {
+                                array_push($compatibleUsers, $otherUser);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new JsonResponse($compatibleUsers);
+    }
+
+    private function isScheduleCompatible(User $user1, User $user2)
+    {
+
+        $compatible = false;
+
+        foreach ($user1->getSchedule() as $user1Schedule)
+        {
+            foreach ($user2->getSchedule() as $user2Schedule)
+            {
+                if ($user1Schedule->getDay() == $user2Schedule->getDay()) //Checking if the days are the same
+                {
+                    if($user1->getTimeFlex() > $user2->getTimeFlex()) //Checking if the timeFlex is compatible
+                    {
+                        if($user1Schedule->getTime() - $user2Schedule->getTime() <= $user2->getTimeFlex())
+                        {
+                            $compatible = true;
+                            break 2;
+                        }
+                    } else
+                    {
+                        if($user2Schedule->getTime() - $user1Schedule->getTime() <= $user1->getTimeFlex())
+                        {
+                            $compatible = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $compatible;
+    }
+
+    private function getDistance(Location $location1, Location $location2): float
+    {
+        $R = 6378137; // Earths radius in meters (mean)
+
+        $dLat = $this->getRad($location2->getLat() - $location1->getLat());
+        $dLong = $this->getRad($location2->getLon() - $location1->getLon());
+
+        //Harvesine algorithm to calculate distance between two coordinates
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos($this->getRad($location1->getLat())) * cos($this->getRad($location2->getLat())) *
+            sin($dLong / 2) * sin($dLong / 2);
+        $c = 2 * asin(sqrt($a));
+        $d = $R * $c;
+
+        //dump('distance: '.$d);
+
+        return $d; // Distance returned in meters
+    }
+
+    private function getRad(float $point): float
+    {
+        return $point * M_PI / 180;
     }
 
     /**

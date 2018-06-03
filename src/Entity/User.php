@@ -5,15 +5,16 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User
+class User implements JsonSerializable
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -44,16 +45,6 @@ class User
     private $locationFlex;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Location", cascade={"persist", "remove"})
-     */
-    private $origin;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Location", inversedBy="users")
-     */
-    private $campus;
-
-    /**
      * @ORM\OneToOne(targetEntity="App\Entity\Vehicle", cascade={"persist", "remove"})
      */
     private $vehicle;
@@ -63,13 +54,23 @@ class User
      */
     private $schedule;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Location")
+     */
+    private $origin;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Location", inversedBy="users")
+     */
+    private $campus;
+
+
     public function __construct()
     {
-        $this->campus = new ArrayCollection();
         $this->schedule = new ArrayCollection();
     }
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -146,28 +147,14 @@ class User
         return $this;
     }
 
-    /**
-     * @return Collection|Location[]
-     */
-    public function getCampus(): Collection
+    public function getCampus(): ?Location
     {
         return $this->campus;
     }
 
-    public function addCampus(Location $campus): self
+    public function setCampus(?Location $campus): self
     {
-        if (!$this->campus->contains($campus)) {
-            $this->campus[] = $campus;
-        }
-
-        return $this;
-    }
-
-    public function removeCampus(Location $campus): self
-    {
-        if ($this->campus->contains($campus)) {
-            $this->campus->removeElement($campus);
-        }
+        $this->campus = $campus;
 
         return $this;
     }
@@ -213,5 +200,24 @@ class User
         }
 
         return $this;
+    }
+
+    public function jsonSerialize() {
+        return array(
+            'id' => $this->id,
+            'username' => $this->username,
+            'email' => $this->email,
+            'password' => $this->password,
+            'timeFlex' => $this->timeFlex,
+            'locationFlex' => $this->locationFlex,
+            'origin' => $this->origin,
+            'vehicle' => $this->vehicle,
+            'schedule' => $this->schedule,
+            'campus' => $this->campus
+        );
+    }
+
+    public function __toString() {
+        return (string) $this->username;
     }
 }
