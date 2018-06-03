@@ -102,4 +102,37 @@ class DataFixtures extends Fixture
             }
         }
     }
+
+    private function getLatLong($address, $zipcode, $city)
+    {
+        if (!empty($address)) {
+            $formattedAddr = urlencode($address);
+            $formattedZipcode = urlencode($zipcode);
+            $formattedCity = urlencode($city);
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => "https://www.mapquestapi.com/geocoding/v1/address?key=lYrP4vF3Uk5zgTiGGuEzQGwGIVDGuy24&json={%22options%22:{%22maxResults%22:%221%22},%22location%22:{%22street%22:%22$formattedAddr%22,%22city%22:%22$formattedCity%22,%22state%22:%22%22,%22postalCode%22:%22$formattedZipcode%22,%22adminArea1%22:%22ES%22}}&sensor=false",
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => "",
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 30,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => "GET",
+              CURLOPT_HTTPHEADER => array(
+                "Cache-Control: no-cache",
+              ),
+            ));
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+
+            if ($err) {
+                echo "cURL Error #:" . $err."\n";
+            } else {
+                return $response;
+            }
+        }
+    }
 }
