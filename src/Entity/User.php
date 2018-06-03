@@ -55,12 +55,12 @@ class User implements JsonSerializable
     private $schedule;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Location")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Position", inversedBy="users")
      */
     private $origin;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Location", inversedBy="users")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Campus", inversedBy="users")
      */
     private $campus;
 

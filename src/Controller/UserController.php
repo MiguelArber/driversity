@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Location;
-use App\Entity\Schedule;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
@@ -36,7 +35,8 @@ class UserController extends Controller
 
         $allUsers = $userRepository->findAll();
         $compatibleUsers = array();
-        foreach($allUsers as $otherUser) {
+        foreach($allUsers as $otherUser)
+        {
             if($user->getId() != $otherUser->getId()) //Checking that user is not the same
             {
                 if(($user->getVehicle() == null && $otherUser->getVehicle() != null) || ($user->getVehicle() != null && $otherUser->getVehicle() == null)) //Checking that at least one user has a car

@@ -2,16 +2,17 @@
 
 namespace App\Form;
 
-use App\Entity\Location;
+use App\Entity\Position;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class LocationType extends AbstractType
+class PositionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('address')
             ->add('lat')
             ->add('lon')
             ->add('locationName')
@@ -21,7 +22,7 @@ class LocationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Location::class,
+            'data_class' => Position::class,
         ]);
     }
 }
