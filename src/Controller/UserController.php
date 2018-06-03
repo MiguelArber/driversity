@@ -45,7 +45,7 @@ class UserController extends Controller
                     {
                         if($this->isScheduleCompatible($user, $otherUser)) //Checking that the schedules are compatible
                         {
-                            if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex()) //Checking that the distanceFlex is OK
+                            if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex() && $this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $otherUser->getLocationFlex()) //Checking that the distanceFlex is OK
                             {
                                 array_push($compatibleUsers, $otherUser);
                             }
@@ -98,7 +98,7 @@ class UserController extends Controller
         $dLat = $this->getRad($location2->getLat() - $location1->getLat());
         $dLong = $this->getRad($location2->getLon() - $location1->getLon());
 
-        //Harvesine formula to calculate distance between two coordinates
+        //Harvesine algorithm to calculate distance between two coordinates
 
         $a = sin($dLat / 2) * sin($dLat / 2) +
             cos($this->getRad($location1->getLat())) * cos($this->getRad($location2->getLat())) *
