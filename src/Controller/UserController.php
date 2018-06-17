@@ -33,20 +33,14 @@ class UserController extends Controller
      */
     public function compatibleUsers(User $user, UserRepository $userRepository): JsonResponse
     {
-
         $allUsers = $userRepository->findAll();
         $compatibleUsers = array();
-        foreach($allUsers as $otherUser) {
-            if($user->getId() != $otherUser->getId()) //Checking that user is not the same
-            {
-                if(($user->getVehicle() == null && $otherUser->getVehicle() != null) || ($user->getVehicle() != null && $otherUser->getVehicle() == null)) //Checking that at least one user has a car
-                {
-                    if($user->getCampus() == $otherUser->getCampus()) //Checking that both users go to the same campus
-                    {
-                        if($this->isScheduleCompatible($user, $otherUser)) //Checking that the schedules are compatible
-                        {
-                            if($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex() && $this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $otherUser->getLocationFlex()) //Checking that the distanceFlex is OK
-                            {
+        foreach ($allUsers as $otherUser) {
+            if ($user->getId() != $otherUser->getId()) { //Checking that user is not the same
+                if (($user->getVehicle() == null && $otherUser->getVehicle() != null) || ($user->getVehicle() != null && $otherUser->getVehicle() == null)) { //Checking that at least one user has a car
+                    if ($user->getCampus() == $otherUser->getCampus()) { //Checking that both users go to the same campus
+                        if ($this->isScheduleCompatible($user, $otherUser)) { //Checking that the schedules are compatible
+                            if ($this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $user->getLocationFlex() && $this->getDistance($user->getOrigin(), $otherUser->getOrigin()) <= $otherUser->getLocationFlex()) { //Checking that the distanceFlex is OK
                                 array_push($compatibleUsers, $otherUser);
                             }
                         }
@@ -60,26 +54,18 @@ class UserController extends Controller
 
     private function isScheduleCompatible(User $user1, User $user2)
     {
-
         $compatible = false;
 
-        foreach ($user1->getSchedule() as $user1Schedule)
-        {
-            foreach ($user2->getSchedule() as $user2Schedule)
-            {
-                if ($user1Schedule->getDay() == $user2Schedule->getDay()) //Checking if the days are the same
-                {
-                    if($user1->getTimeFlex() > $user2->getTimeFlex()) //Checking if the timeFlex is compatible
-                    {
-                        if($user1Schedule->getTime() - $user2Schedule->getTime() <= $user2->getTimeFlex())
-                        {
+        foreach ($user1->getSchedule() as $user1Schedule) {
+            foreach ($user2->getSchedule() as $user2Schedule) {
+                if ($user1Schedule->getDay() == $user2Schedule->getDay()) { //Checking if the days are the same
+                    if ($user1->getTimeFlex() > $user2->getTimeFlex()) { //Checking if the timeFlex is compatible
+                        if ($user1Schedule->getTime() - $user2Schedule->getTime() <= $user2->getTimeFlex()) {
                             $compatible = true;
                             break 2;
                         }
-                    } else
-                    {
-                        if($user2Schedule->getTime() - $user1Schedule->getTime() <= $user1->getTimeFlex())
-                        {
+                    } else {
+                        if ($user2Schedule->getTime() - $user1Schedule->getTime() <= $user1->getTimeFlex()) {
                             $compatible = true;
                             break 2;
                         }
@@ -144,7 +130,12 @@ class UserController extends Controller
      */
     public function show(User $user): Response
     {
-        return $this->render('user/show.html.twig', ['user' => $user]);
+        $response = new JsonResponse();
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->setData(array(
+            'user' => $user
+        ));
+        return $response;
     }
 
     /**
