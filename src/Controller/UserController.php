@@ -5,8 +5,11 @@ namespace App\Controller;
 use App\Entity\Location;
 use App\Entity\Schedule;
 use App\Entity\User;
+use App\Entity\Vehicle;
 use App\Form\UserType;
+use App\Form\VehicleType;
 use App\Repository\UserRepository;
+use App\Repository\VehicleRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -107,22 +110,51 @@ class UserController extends Controller
      */
     public function new(Request $request): Response
     {
+        //First we load the entity manager
+        $em = $this->getDoctrine()->getManager();
+
+        //If a vehicle is defined, creates a new vehicle object and saves it in the DB
+        $vehicle = new Vehicle();
+
+        empty($request->get('type'))?: $vehicle->setType($request->get('type'));
+        empty($request->get('model'))?: $vehicle->setModel($request->get('model'));
+        empty($request->get('seats'))?: $vehicle->setSeats($request->get('seats'));
+        empty($request->get('price'))?: $vehicle->setPrice($request->get('price'));
+
+        $em->persist($vehicle);
+        $em->flush();
+
+        //If an origin is defined, creates an origin object and saves it in the DB
+        $origin = new Location();
+
+        empty($request->get('lat'))?: $origin->setLat($request->get('lat'));
+        empty($request->get('lon'))?: $origin->setLon($request->get('lon'));
+        empty($request->get('locationName'))?: $origin->setLocationName($request->get('locationName'));
+        empty($request->get('lat'))?: $origin->setIsCampus(false);
+
+        $em->persist($origin);
+        $em->flush();
+
+        //Finds the selected campus in the DB
+        $campus = $em->getRepository(Location::class)->find($request->get('campus'));
+
+        //Creates a new user with all its data (with the car and the locations).
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
+        $user->setUsername($request->get('username'));
+        $user->setEmail($request->get('email'));
+        $user->setPassword($request->get('password'));
+        $user->setTimeFlex($request->get('timeFlex'));
+        $user->setLocationFlex($request->get('locationFlex'));
+        $user->setCampus($campus);
+        $user->setOrigin($em->getRepository(Location::class)->find($origin));
+        $user->setVehicle($em->getRepository(Vehicle::class)->find($vehicle));
 
-            return $this->redirectToRoute('user_index');
-        }
+        $em->persist($user);
+        $em->flush();
 
-        return $this->render('user/new.html.twig', [
-            'user' => $user,
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('user_show', array('id' => $em->getRepository(User::class)->find($user)->getid()));
+
     }
 
     /**

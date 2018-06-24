@@ -28,6 +28,8 @@ class ScheduleController extends Controller
      */
     public function new(Request $request): Response
     {
+        //TODO: Buscar en la DB el usuario al que pertenece esta Schedule y añadirlo a su lista de schedules. Guardar!!!
+
         $schedule = new Schedule();
         $form = $this->createForm(ScheduleType::class, $schedule);
         $form->handleRequest($request);
