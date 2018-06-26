@@ -125,12 +125,8 @@ class UserController extends Controller
         empty($request->get('seats'))?: $vehicle->setSeats($request->get('seats'));
         empty($request->get('price'))?: $vehicle->setPrice($request->get('price'));
 
-
-
-        $em->persist($vehicle);
+        empty($request->get('price'))?: $em->persist($vehicle);
         $em->flush();
-
-
         //If an origin is defined, creates an origin object and saves it in the DB
         $origin = new Location();
 
@@ -139,10 +135,8 @@ class UserController extends Controller
         empty($request->get('locationName'))?: $origin->setLocationName($request->get('locationName'));
         empty($request->get('lat'))?: $origin->setIsCampus(false);
 
-        $em->persist($origin);
+        empty($request->get('type'))?: $em->persist($origin);
         $em->flush();
-
-
 
         //Finds the selected campus in the DB
         $campus = $em->getRepository(Location::class)->find($request->get('campus'));
@@ -162,15 +156,11 @@ class UserController extends Controller
         $em->persist($user);
         $em->flush();
 
-        $response = new JsonResponse();
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        // $response = new JsonResponse();
+        // $response->headers->set('Access-Control-Allow-Origin', '*');
+        // return $response;
 
-        // return $this->redirectToRoute('user_show', array('id' => $em->getRepository(User::class)->find($user)->getid()));
-
-        // $response->setData(array(
-        //   // 'user' => $em->getRepository(User::class)->find($user)->getid()
-        // ));
+        return $this->show($user);
     }
 
     /**
