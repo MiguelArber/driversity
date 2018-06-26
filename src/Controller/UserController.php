@@ -129,19 +129,10 @@ class UserController extends Controller
 
         $em->persist($vehicle);
         $em->flush();
-        //Problema en el return despues de un flush.. se pierden los headers
-        $response = new JsonResponse();
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-
-
-
 
 
         //If an origin is defined, creates an origin object and saves it in the DB
         $origin = new Location();
-
-
 
         empty($request->get('lat'))?: $origin->setLat($request->get('lat'));
         empty($request->get('lon'))?: $origin->setLon($request->get('lon'));
@@ -170,6 +161,10 @@ class UserController extends Controller
 
         $em->persist($user);
         $em->flush();
+
+        $response = new JsonResponse();
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
 
         // return $this->redirectToRoute('user_show', array('id' => $em->getRepository(User::class)->find($user)->getid()));
 
