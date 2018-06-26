@@ -20,12 +20,12 @@ class User implements JsonSerializable
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $username;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $email;
 
@@ -193,7 +193,6 @@ class User implements JsonSerializable
     {
         if ($this->schedule->contains($schedule)) {
             $this->schedule->removeElement($schedule);
-            // set the owning side to null (unless already changed)
             if ($schedule->getUser() === $this) {
                 $schedule->setUser(null);
             }
