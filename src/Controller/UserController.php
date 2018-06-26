@@ -157,7 +157,7 @@ class UserController extends Controller
         $em->persist($user);
         $em->flush();
 
-        return $this->redirectToRoute('user_show', array('id' => $em->getRepository(User::class)->find($user)->getid()));
+        return $this->show($user);
     }
 
     /**
